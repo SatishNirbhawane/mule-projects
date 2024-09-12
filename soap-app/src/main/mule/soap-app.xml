@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a535a269-e7bb-4e1e-bafc-8b81272650da" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="ad2a3141-60f4-4726-aeb5-098d17681bb4" >
+		<wsc:connection wsdlLocation="http://www.dneonline.com/calculator.asmx?wsdl" service="Calculator" port="CalculatorSoap" address="http://www.dneonline.com/calculator.asmx" >
+			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
+		</wsc:connection>
+	</wsc:config>
+	<flow name="soap-appFlow" doc:id="200c7ec1-9c43-4ee8-a037-a697b5d01292" >
+		<http:listener doc:name="Listener" doc:id="9f8e0e6b-6aee-4cbc-b5fc-415c776a64ac" config-ref="HTTP_Listener_config" path="/soap"/>
+		<set-variable value="#[attributes.queryParams.intA]" doc:name="Set Variable" doc:id="ca23fd44-5749-4bc7-b9c9-a476a5494ef5" variableName="intA"/>
+		<set-variable value="#[attributes.queryParams.intB]" doc:name="Set Variable" doc:id="725ed7cd-080b-49ea-9d86-8b6ee1ae6552" variableName="intB"/>
+		<ee:transform doc:name="Transform Message" doc:id="bf2d20d0-fe2f-4769-8cef-7baec4829dcb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://tempuri.org/
+---
+{
+	ns0#Add: {
+		ns0#intA: vars.intA as Number,
+		ns0#intB: vars.intB as Number
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume operation="Add" doc:name="Consume" doc:id="74f28c9b-eb38-4202-993d-2e14a53094e0" config-ref="Web_Service_Consumer_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="0c4bf5c6-42ab-4fd9-b6fd-afb3b4ba7412" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="41349d93-b1c3-4430-962d-79b100b72354" message="#[payload]"/>
+	</flow>
+</mule>
