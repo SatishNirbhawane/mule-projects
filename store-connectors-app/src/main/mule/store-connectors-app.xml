@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="0b70bc69-03e8-4c7c-881c-68e867c7a91e" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="0b2e3a05-9595-4567-b8c3-552c49ff8543" />
+	<flow name="store-connectors-appFlow" doc:id="e4e6f672-04f8-4080-8582-1f7ec841e60b" >
+		<http:listener doc:name="Listener" doc:id="bbf447fb-9b91-46fc-9e9e-73cd3d2166cd" config-ref="HTTP_Listener_config" path="/store"/>
+		<set-variable value="#[attributes.queryParams.intA]" doc:name="Set Variable" doc:id="ba1e0fd2-bcc2-403b-9cdc-cc8660b5640a" variableName="intA"/>
+		<set-variable value="#[attributes.queryParams.intA]" doc:name="Set Variable" doc:id="16c648ba-0ece-44cc-a258-9347c581993e" variableName="intB"/>
+		<os:store doc:name="Store" doc:id="6b07ace7-f4bf-47f0-97c4-e84aea1cd202" key="#[vars.intA]" objectStore="Object_store">
+			<os:value ><![CDATA[#[vars.intB]]]></os:value>
+		</os:store>
+	</flow>
+	<flow name="store-connectors-appFlow2" doc:id="9115ced5-67b4-4331-adb4-3fb8ec863aa6" >
+		<http:listener doc:name="Listener" doc:id="f4993265-0b42-4aa6-9e4b-c4e3443da0de" config-ref="HTTP_Listener_config" path="/retrive-all"/>
+		<os:retrieve-all doc:name="Retrieve all" doc:id="40148a6b-e587-4263-b78a-03717d52a684" />
+	</flow>
+	<flow name="store-connectors-appFlow1" doc:id="1764423d-3c12-4458-8173-9d637cd979e5" >
+		<http:listener doc:name="Listener" doc:id="d8d053f3-38e8-43b3-aa91-5698c23d9b25" config-ref="HTTP_Listener_config" path="/keys"/>
+		<os:retrieve-all-keys doc:name="Retrieve all keys" doc:id="f7563532-c1bf-4aff-b658-da9f24f0e80d" objectStore="Object_store"/>
+	</flow>
+	<flow name="store-connectors-appFlow3" doc:id="4d580f70-b8f8-4df7-9756-84c7a04eb7db" >
+		<http:listener doc:name="Listener" doc:id="9da8652d-2e01-48a8-81ae-463ac19a615e" config-ref="HTTP_Listener_config" path="/contains"/>
+		<os:contains doc:name="Contains" doc:id="6e854cb5-6975-46e3-9e19-0ce6253f8e70" key="#[attributes.queryParams.intA]" objectStore="Object_store"/>
+		<ee:transform doc:name="Transform Message" doc:id="5b3a330c-8aa5-4df2-81ef-bb0c62cb131a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
