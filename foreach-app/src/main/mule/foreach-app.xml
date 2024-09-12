@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a3793651-4b25-4071-9333-e493a982dedb" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="47976344-5fcf-431c-a538-81b2589abf44" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="satish" database="stduents" />
+	</db:config>
+	<flow name="foreach-appFlow" doc:id="9cadc238-e7e8-4edc-bc9d-741473cea165" >
+		<http:listener doc:name="Listener" doc:id="ab4208a6-b268-4e63-ae61-ce42e74b2f42" config-ref="HTTP_Listener_config" path="/foreach"/>
+		<ee:transform doc:name="Transform Message" doc:id="9d22773e-4cc2-48a7-9316-d7ddf35a6b07" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+1 to 10 map
+{
+	s_id:if($$==2)'mule' else 200+$$,
+	stud_name:"Shiva",	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<parallel-foreach doc:name="Parallel For Each" doc:id="856dfebc-2ca2-41df-9147-52089222d009" >
+			<logger level="INFO" doc:name="Logger" doc:id="44ae59aa-0524-41dc-8fcb-1c17978c21a3" message="#[payload]" />
+			<db:insert doc:name="Insert" doc:id="b4b83800-5f82-4df5-b27b-7cbb462f5ab6" config-ref="Database_Config">
+				<db:sql><![CDATA[insert into  stduents.stud(s_id,stud_name) values(:s_id,:stud_name);]]></db:sql>
+				<db:input-parameters><![CDATA[#[payload]]]></db:input-parameters>
+			</db:insert>
+		</parallel-foreach>
+	</flow>
+</mule>
