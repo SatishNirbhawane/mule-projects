@@ -59,4 +59,30 @@ output application/json
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<flow name="sfdc-crud-appFlow2" doc:id="075448a8-59ce-4405-9a5c-8ee1e02345e0" >
+		<http:listener doc:name="Listener" doc:id="977df5a3-df6f-437f-9053-d08e11e6b9db" config-ref="HTTP_Listener_config" path="/update"/>
+		<ee:transform doc:name="Transform Message" doc:id="ac3cc73e-c8d7-49e9-b366-f9c749ee143b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    Id: payload.Id,
+    Email: payload.Email
+  }
+]
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:update doc:name="Update" doc:id="ff155071-d7f0-4c39-9284-cd341aaac62a" config-ref="Salesforce_Config" type="Contact"/>
+		<ee:transform doc:name="Transform Message" doc:id="34c549a0-0bfa-4537-838f-25449c9b4afb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
 </mule>

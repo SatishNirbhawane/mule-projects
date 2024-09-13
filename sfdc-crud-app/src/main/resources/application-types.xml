@@ -18,4 +18,13 @@ type new = Array<{|  Name: String,   Email: String|}> {"example": "[{\\\"Name\\\
       </types:input-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#ac3cc73e-c8d7-49e9-b366-f9c749ee143b">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="new"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
 </types:mule>
