@@ -1,0 +1,14 @@
+[{
+        "First_Name": "om",
+		"Last_Name" :"Shiavy",
+		"Course_Name":"MCA",
+		"DOB":"10/09/1999",
+        "Email": "om@gmail.com"
+    },
+    {
+        "First_Name": "Raj",
+		"Last_Name" :"Shiavy",
+		"Course_Name":"MCA",
+		"DOB":"10/09/1999",
+        "Email": "raj@gmail.com"
+ }]

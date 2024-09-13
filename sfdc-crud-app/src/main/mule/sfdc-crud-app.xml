@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ec5a7529-e353-42d5-844a-7fdb63fd719d" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="f24a5141-fda6-4e13-a2a1-ad6e740789de" >
+		<salesforce:basic-connection username="shiv14@dev.com" password="Shiv@2023" securityToken="lUzWEyI6jelB9C5Z9ZGevdrE" />
+	</salesforce:sfdc-config>
+	<flow name="sfdc-crud-appFlow" doc:id="f64547f7-4dc5-4a3f-890f-175822e8238b" >
+		<http:listener doc:name="Listener" doc:id="6c5aee6c-d776-4b9b-b79e-58b50176bb0e" config-ref="HTTP_Listener_config" path="/create"/>
+		<ee:transform doc:name="Transform Message" doc:id="62db246f-4c7e-4d85-a13c-24d6f1da96f0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	LastName: payload01.Name,
+	Email: payload01.Email
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create doc:name="Create" doc:id="ffe3e810-bd14-4088-91ef-e175da0ef698" config-ref="Salesforce_Config" type="Contact"/>
+		<ee:transform doc:name="Transform Message" doc:id="0d142ce5-182d-4790-81a1-f49a0527904d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="sfdc-crud-appFlow1" doc:id="47982012-d94c-40a6-8b3d-9e5a789a838f" >
+		<http:listener doc:name="Listener" doc:id="5e625964-9932-4c05-b773-8caf675691b5" config-ref="HTTP_Listener_config" path="/query"/>
+		<salesforce:query doc:name="Query" doc:id="e9a31dc9-19d2-4e8f-a83e-5ac7def17d40" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[select LastName, Email from Contact where Name=':Name']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	Name : attributes.queryParams.Name
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="212a11d9-d300-4302-87d2-662b72981fe9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	payload
+	
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

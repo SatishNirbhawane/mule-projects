@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="new" format="json">
+      <types:shape format="weave" example="examples/sfdc_input-8.json"><![CDATA[%dw 2.0
+
+type new = Array<{|  Name: String,   Email: String|}> {"example": "[{\\\"Name\\\":\\\"om\\\",\\\"Email\\\":\\\"om@gmail.com\\\"},{\\\"Name\\\":\\\"Raj\\\",\\\"Email\\\":\\\"raj@gmail.com\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#62db246f-4c7e-4d85-a13c-24d6f1da96f0">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="new"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
